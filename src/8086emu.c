@@ -1,5 +1,9 @@
+#include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
+
+#define MEMORY_SIZE 65536 // x86-16 has 64 KB of main memory
 
 // opcodes
 #define MOV_OPCODE 0b100010
@@ -17,9 +21,11 @@
 #define W_BITMASK 1
 
 typedef unsigned short u16;
+typedef uint8_t u8;
 
 int main(int argc, char *argv[])
 {
+    u8 *memory = (u8 *) malloc(sizeof(u8) * MEMORY_SIZE); // main memory
     u16 reg; // stores a register operand
     u16 rm; // stores a register operand
     u16 word; // 0 if instr. operates on byte data, 1 if word data
@@ -36,6 +42,11 @@ int main(int argc, char *argv[])
         {"dh", "si"},
         {"bh", "di"}
     };
+
+    if (memory == NULL) {
+        printf("Failed to allocate memory.\n");
+        return 1;
+    }
 
     if (argc == 1) {
         printf("Not enough arguments. Usage: 8086emu filename -d\n");
@@ -96,6 +107,7 @@ int main(int argc, char *argv[])
     if (in_file != NULL) {
         fclose(in_file);
     }
+    free(memory);
     return 0;
 }
 
