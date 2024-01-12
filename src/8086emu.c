@@ -46,13 +46,11 @@ int main(int argc, char *argv[])
     }
 
     // open bin file
-    printf("Attempting to open file: %s\n", argv[1]);
     FILE *in_file = fopen(argv[1], "r");
     if (in_file == NULL) {
         printf("File could not be opened.\n");
         return 1;
     }
-    printf("File successfully opened.\n");
 
     // disassembly mode
     if (argv[2] != NULL && strcmp(argv[2], "-d") == 0) {
