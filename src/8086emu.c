@@ -7,9 +7,13 @@
 // modes
 #define REGISTER_TO_REGISTER_MODE 0b11
 
+// directions
+#define REG_IS_SOURCE 0
+#define REG_IS_DESTINATION 1
+
 // bitmasks
 #define REG_BITMASK 0x38
-#define RM_BITMASK 0x3
+#define RM_BITMASK 0x7
 #define W_BITMASK 1
 
 typedef unsigned short u16;
@@ -20,6 +24,7 @@ int main(int argc, char *argv[])
     u16 rm; // stores a register operand
     u16 word; // 0 if instr. operates on byte data, 1 if word data
     u16 mode; // 0b11 if register mode, else memory mode with displacement length
+    u16 direction; // 0 if source is specified in REG field, 1 if destination is specified in REG field
     unsigned char buffer[2];
     char *regs[8][2] = { // regs[register value][word]
         {"al", "ax"},
@@ -59,11 +64,32 @@ int main(int argc, char *argv[])
                 rm = buffer[1] & RM_BITMASK;
                 word = buffer[0] & W_BITMASK;
                 mode = buffer[1] >> 6;
+                direction = (buffer[0] & 2) >> 1;
 
                 printf("mov ");
-                printf("%s, ", regs[reg][word]);
+
+                // mov destination
+                switch (direction) {
+                    case REG_IS_SOURCE:
+                        printf("%s", regs[rm][word]);
+                        break;
+                    case REG_IS_DESTINATION:
+                        printf("%s", regs[reg][word]);
+                        break;
+                }
+
+                printf(", ");
+
+                // mov source
                 if (mode == REGISTER_TO_REGISTER_MODE) {
-                    printf("%s\n", regs[rm][word]);
+                    switch (direction) {
+                        case REG_IS_SOURCE:
+                            printf("%s\n", regs[reg][word]);
+                            break;
+                        case REG_IS_DESTINATION:
+                            printf("%s\n", regs[rm][word]);
+                            break;
+                    }
                 }
             }
         }
