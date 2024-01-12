@@ -20,17 +20,16 @@
 #define RM_BITMASK 0x7
 #define W_BITMASK 1
 
-typedef unsigned short u16;
 typedef uint8_t u8;
 
 int main(int argc, char *argv[])
 {
     u8 *memory = (u8 *) malloc(sizeof(u8) * MEMORY_SIZE); // main memory
-    u16 reg; // stores a register operand
-    u16 rm; // stores a register operand
-    u16 word; // 0 if instr. operates on byte data, 1 if word data
-    u16 mode; // 0b11 if register mode, else memory mode with displacement length
-    u16 direction; // 0 if source is specified in REG field, 1 if destination is specified in REG field
+    u8 reg; // stores a register operand
+    u8 rm; // stores a register operand
+    u8 word; // 0 if instr. operates on byte data, 1 if word data
+    u8 mode; // 0b11 if register mode, else memory mode with displacement length
+    u8 direction; // 0 if source is specified in REG field, 1 if destination is specified in REG field
     unsigned char buffer[2];
     char *regs[8][2] = { // regs[register value][word]
         {"al", "ax"},
