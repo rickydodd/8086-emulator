@@ -6,10 +6,10 @@
 #define MEMORY_SIZE 65536 // x86-16 has 64 KB of main memory
 
 // opcodes
-#define MOV_OPCODE 0b100010
+#define REGISTER_TO_REGISTER_MOV_OPCODE 0b100010
 
 // modes
-#define REGISTER_TO_REGISTER_MODE 0b11
+#define REGISTER_MODE 0b11
 
 // directions
 #define REG_IS_SOURCE 0
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         printf("; %s, x86-16 (8086) disassembly\n", argv[1]);
         printf("bits 16\n");
         while (fread(buffer, 2, 1, in_file) != 0) {
-            if (buffer[0] >> 2 == MOV_OPCODE) {
+            if (buffer[0] >> 2 == REGISTER_TO_REGISTER_MOV_OPCODE) {
                 reg = (buffer[1] & REG_BITMASK) >> 3;
                 rm = buffer[1] & RM_BITMASK;
                 word = buffer[0] & W_BITMASK;
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
                 printf(", ");
 
                 // mov source
-                if (mode == REGISTER_TO_REGISTER_MODE) {
+                if (mode == REGISTER_MODE) {
                     switch (direction) {
                         case REG_IS_SOURCE:
                             printf("%s\n", regs[reg][word]);
