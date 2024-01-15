@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     u8 word; // 0 if instr. operates on byte data, 1 if word data
     u8 mode; // 0b11 if register mode, else memory mode with displacement length
     u8 direction; // 0 if source is specified in REG field, 1 if destination is specified in REG field
-    unsigned char buffer[2];
+    unsigned char buffer[4];
     char *regs[8][2] = { // regs[register value][word]
         {"al", "ax"},
         {"cl", "cx"},
