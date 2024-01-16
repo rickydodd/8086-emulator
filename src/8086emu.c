@@ -15,11 +15,6 @@
 #define REG_IS_SOURCE 0
 #define REG_IS_DESTINATION 1
 
-// bitmasks
-#define REG_BITMASK 0x38
-#define RM_BITMASK 0x7
-#define W_BITMASK 1
-
 typedef uint8_t u8;
 
 int main(int argc, char *argv[])
@@ -68,9 +63,9 @@ int main(int argc, char *argv[])
         printf("bits 16\n");
         while (fread(buffer, 2, 1, in_file) != 0) {
             if (buffer[0] >> 2 == REGISTER_TO_REGISTER_MOV_OPCODE) {
-                reg = (buffer[1] & REG_BITMASK) >> 3;
-                rm = buffer[1] & RM_BITMASK;
-                word = buffer[0] & W_BITMASK;
+                reg = (buffer[1] & 0x38) >> 3;
+                rm = buffer[1] & 0x7;
+                word = buffer[0] & 1;
                 mode = buffer[1] >> 6;
                 direction = (buffer[0] & 2) >> 1;
 
