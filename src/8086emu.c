@@ -16,6 +16,9 @@
 #define REG_IS_SOURCE 0
 #define REG_IS_DESTINATION 1
 
+// convert two 8-bit values, LO and HI, to a signed 16-bit integer
+#define LO_HI_TO_I16(LO, HI) (i16)(((i16)HI << 8) + LO)
+
 typedef uint8_t u8;
 typedef int8_t i8;
 typedef uint16_t u16;
@@ -111,7 +114,7 @@ int main(int argc, char *argv[])
                     tmp = buffer[1];
                     fread(buffer, 1, 1, in_file);
 
-                    printf("mov %s, %d\n", regs[reg][word], (i16)(((i16)buffer[0] << 8) + tmp));
+                    printf("mov %s, %d\n", regs[reg][word], LO_HI_TO_I16(tmp, buffer[0]));
                 }
             }
         }
