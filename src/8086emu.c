@@ -7,6 +7,7 @@
 
 // opcodes
 #define REGISTER_TO_REGISTER_MOV_OPCODE 0b100010
+#define IMMEDIATE_TO_REGISTER_OPCODE 0b1011
 
 // modes
 #define REGISTER_MODE 0b11
@@ -16,9 +17,13 @@
 #define REG_IS_DESTINATION 1
 
 typedef uint8_t u8;
+typedef int8_t i8;
+typedef uint16_t u16;
+typedef int16_t i16;
 
 int main(int argc, char *argv[])
 {
+    u16 tmp;
     u8 *memory = (u8 *) malloc(sizeof(u8) * MEMORY_SIZE); // main memory
     u8 reg; // stores a register operand
     u8 rm; // stores a register operand
@@ -93,6 +98,20 @@ int main(int argc, char *argv[])
                             printf("%s\n", regs[rm][word]);
                             break;
                     }
+                }
+            } else if (buffer[0] >> 4 == IMMEDIATE_TO_REGISTER_OPCODE) {
+                reg = buffer[0] & 0x7; // reg field
+                word = (buffer[0] & 0x8) >> 3; // w field
+
+                if (word == 0) { // if word = 0, then 8-bit immediate
+                    printf("mov %s, %d\n", regs[reg][word], (i8)buffer[1]);
+                } else { // else, 16-bit immediate
+                    // write the 8-bit data byte to tmp and read in the second data byte,
+                    // because w = 1
+                    tmp = buffer[1];
+                    fread(buffer, 1, 1, in_file);
+
+                    printf("mov %s, %d\n", regs[reg][word], (i16)(((i16)buffer[0] << 8) + tmp));
                 }
             }
         }
