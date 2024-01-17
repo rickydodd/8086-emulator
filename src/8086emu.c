@@ -60,22 +60,22 @@ int main(int argc, char *argv[])
 
     if (memory == NULL) {
         printf("Failed to allocate memory.\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (argc == 1) {
         printf("Not enough arguments. Usage: 8086emu filename -d\n");
-        return 1;
+        return EXIT_FAILURE;
     } else if (argc > 3) {
         printf("Too many arguments. Usage: 8086emu filename -d\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // open bin file
     FILE *in_file = fopen(argv[1], "r");
     if (in_file == NULL) {
         printf("File could not be opened.\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // disassembly mode
@@ -193,6 +193,6 @@ int main(int argc, char *argv[])
         fclose(in_file);
     }
     free(memory);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
