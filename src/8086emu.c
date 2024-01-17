@@ -10,6 +10,9 @@
 #define IMMEDIATE_TO_REGISTER_OPCODE 0b1011
 
 // modes
+#define MEMORY_MODE 0b00
+#define MEMORY_MODE_8BIT_DISPLACEMENT 0b01
+#define MEMORY_MODE_16BIT_DISPLACEMENT 0b10
 #define REGISTER_MODE 0b11
 
 // directions
@@ -43,6 +46,16 @@ int main(int argc, char *argv[])
         {"ch", "bp"},
         {"dh", "si"},
         {"bh", "di"}
+    };
+    char *effective_addr[8] = { // effective address calculation
+        "bx + si",
+        "bx + di",
+        "bp + si",
+        "bp + di",
+        "si",
+        "di",
+        "bp",
+        "bx"
     };
 
     if (memory == NULL) {
@@ -80,26 +93,82 @@ int main(int argc, char *argv[])
                 printf("mov ");
 
                 // mov destination
-                switch (direction) {
-                    case REG_IS_SOURCE:
-                        printf("%s", regs[rm][word]);
-                        break;
-                    case REG_IS_DESTINATION:
-                        printf("%s", regs[reg][word]);
-                        break;
+                if (direction == REG_IS_SOURCE) {
+                    switch (mode) {
+                        case MEMORY_MODE:
+                            printf("[%s]", effective_addr[rm]);
+                            break;
+                        case MEMORY_MODE_8BIT_DISPLACEMENT:
+                            fread(buffer, 1, 1, in_file); // read 8-bit displacement byte
+
+                            printf("[%s", effective_addr[rm]);
+
+                            // if the 8-bit displacement value is not zero, then include it in
+                            // disassembly. if it is zero, then ignore it.
+                            if (buffer[0] != 0) {
+                                printf(" + %d]", buffer[0]);
+                            } else {
+                                printf("]");
+                            }
+                            break;
+                        case MEMORY_MODE_16BIT_DISPLACEMENT:
+                            fread(buffer, 2, 1, in_file); // read LO and HI bytes
+
+                            printf("[%s", effective_addr[rm]);
+
+                            // if the 16-bit displacement value is not zero, then include it in
+                            // disassembly. if it is zero, then ignore it.
+                            if (buffer[0] != 0 && buffer[1] != 0) {
+                                printf(" + %d]", LO_HI_TO_I16(buffer[0], buffer[1]));
+                            } else {
+                                printf("]");
+                            }
+                            break;
+                        case REGISTER_MODE:
+                            printf("%s", regs[rm][word]);
+                    }
+                } else if (direction == REG_IS_DESTINATION) {
+                    printf("%s", regs[reg][word]);
                 }
 
                 printf(", ");
 
                 // mov source
-                if (mode == REGISTER_MODE) {
-                    switch (direction) {
-                        case REG_IS_SOURCE:
-                            printf("%s\n", regs[reg][word]);
+                if (direction == REG_IS_SOURCE) {
+                    printf("%s\n", regs[reg][word]);
+                } else if (direction == REG_IS_DESTINATION) {
+                    switch (mode) {
+                        case MEMORY_MODE:
+                            printf("[%s]\n", effective_addr[rm]);
                             break;
-                        case REG_IS_DESTINATION:
+                        case MEMORY_MODE_8BIT_DISPLACEMENT:
+                            fread(buffer, 1, 1, in_file); // read 8-bit displacement byte
+
+                            printf("[%s", effective_addr[rm]);
+
+                            // if the 8-bit displacement value is not zero, then include it in
+                            // disassembly. if it is zero, then ignore it.
+                            if (buffer[0] != 0) {
+                                printf(" + %d]\n", buffer[0]);
+                            } else {
+                                printf("]\n");
+                            }
+                            break;
+                        case MEMORY_MODE_16BIT_DISPLACEMENT:
+                            fread(buffer, 2, 1, in_file); // read LO and HI bytes, respectively
+
+                            printf("[%s", effective_addr[rm]);
+
+                            // if the 16-bit displacement value is not zero, then include it in
+                            // disassembly. if it is zero, then ignore it.
+                            if (LO_HI_TO_I16(buffer[0], buffer[1]) != 0) {
+                                printf(" + %d]\n", LO_HI_TO_I16(buffer[0], buffer[1]));
+                            } else {
+                                printf("]\n");
+                            }
+                            break;
+                        case REGISTER_MODE:
                             printf("%s\n", regs[rm][word]);
-                            break;
                     }
                 }
             } else if (buffer[0] >> 4 == IMMEDIATE_TO_REGISTER_OPCODE) {
